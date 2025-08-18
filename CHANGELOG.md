@@ -1,3 +1,9 @@
+## 1.1.12 2025-08-17 <dave at tiredofit dot ca>
+
+   ### Added
+      - ZT Net 0.7.7
+
+
 ## 1.1.11 2025-08-03 <dave at tiredofit dot ca>
 
    ### Added

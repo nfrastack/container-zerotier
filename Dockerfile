@@ -10,7 +10,7 @@ ARG ZT_NET_VERSION
 
 ENV COREDNS_VERSION=${COREDNS_VERSION:-"v1.12.2"} \
     ZEROTIER_VERSION=${ZEROTIER_VERSION:-"1.14.2"} \
-    ZT_NET_VERSION=${ZT_NET_VERSION:-"v0.7.6"} \
+    ZT_NET_VERSION=${ZT_NET_VERSION:-"v0.7.7"} \
     COREDNS_REPO_URL=https://github.com/coredns/coredns \
     ZEROTIER_REPO_URL=https://github.com/zerotier/ZeroTierOne \
     ZT_NET_REPO_URL=https://github.com/sinamics/ztnet \

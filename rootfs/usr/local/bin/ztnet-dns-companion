@@ -1,4 +1,8 @@
 #!/command/with-contenv bash
+# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
+
 # ztnet-dns-companion: Contact ZTNET API, and convert a list of authorized network members to hosts(5) or coredns format
 
 if [ -z "${ZTNET_API_TOKEN}" ]; then

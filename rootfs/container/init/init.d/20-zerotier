@@ -1,0 +1,37 @@
+#!/command/with-contenv bash
+# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
+
+source /container/base/functions/container/init
+prepare_service 20-zerotier
+SERVICE_NAME="zerotier"
+
+zerotier_setup_container_mode
+zerotier_bootstrap_filesystem
+zerotier_add_bash_completion
+
+if [ ! -f "/container/state/restart" ] ; then
+    if var_true "${ENABLE_CONTROLLER}" ; then
+        print_debug "Configuring Controller"
+        zerotier_configure_controller
+    else
+        service_stop 20-controller
+    fi
+
+    if var_true "${ENABLE_UI}" ; then
+        print_debug "Configuring UI"
+        zerotier_configure_ui
+    else
+        service_stop 10-nginx
+        service_stop 20-ui
+    fi
+
+    if var_true "${ENABLE_STANDALONE}" ; then
+        print_debug "Configuring Standlone"
+        liftoff
+        exit 0
+    fi
+fi
+
+liftoff

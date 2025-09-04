@@ -1,0 +1,14 @@
+#!/command/with-contenv bash
+# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
+
+source /container/base/functions/container/init
+SERVICE_NAME="zerotier-controller"
+prepare_service 20-zerotier
+check_container_initialized
+
+liftoff
+
+print_start "Starting Zerotier One ${ZEROTIER_VERSION}"
+silent exec s6-setuidgid "${ZEROTIER_USER}" zerotier-one ${ZEROTIER_ARGS}

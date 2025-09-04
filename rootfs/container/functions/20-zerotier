@@ -1,6 +1,8 @@
-#!/command/with-contenv bash
+# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
 
-add_bash_completion() {
+zerotier_add_bash_completion() {
     cat <<EOF >> /root/.bashrc
 
 ## Zerotier Bash Completions
@@ -52,40 +54,19 @@ complete -F _zerotier_zerotier-cli_completions zerotier-cli
 EOF
 }
 
-bootstrap_filesystem() {
+zerotier_bootstrap_filesystem() {
     case "${1}" in
-        client )
-            if [ ! -d "${CLIENT_DATA_PATH}" ]; then
-                mkdir -p "${CLIENT_DATA_PATH}"
-            fi
-            if [ "$(stat -c %U "${CLIENT_DATA_PATH}")" != "${CLIENT_USER}" ] ; then chown "${CLIENT_USER}":zerotier "${CLIENT_DATA_PATH}" ; fi
-            ln -sf "${CLIENT_DATA_PATH}" /var/lib/zerotier-one
-        ;;
         controller )
-            if [ ! -d "${CONTROLLER_DATA_PATH}" ]; then
-                mkdir -p "${CONTROLLER_DATA_PATH}"
-            fi
-            if [ "$(stat -c %U "${CONTROLLER_DATA_PATH}")" != "${CLIENT_USER}" ] ; then chown "${CLIENT_USER}":zerotier "${CONTROLLER_DATA_PATH}" ; fi
+            create_folder \
+                            "${CONTROLLER_DATA_PATH}" \
+                            zerotier:root 750
+
             ln -sf "${CONTROLLER_DATA_PATH}" /var/lib/zerotier-one
         ;;
-        dns )
-            mkdir -p /etc/coredns/
-            chown -R "${DNS_USER}":zerotier /etc/coredns/
-            if [ ! -d "${DNS_DATA_PATH}" ]; then
-                mkdir -p "${DNS_DATA_PATH}"
-            fi
-            if [ "$(stat -c %U "${DNS_DATA_PATH}")" != "${DNS_USER}" ] ; then chown "${DNS_USER}":zerotier "${DNS_DATA_PATH}" ; fi
-            if [ ! -d "${DNS_LOG_PATH}" ]; then
-                mkdir -p "${DNS_LOG_PATH}"
-            fi
-            create_logrotate coredns "${DNS_LOG_PATH}"/"${DNS_LOG_FILE}" coredns "${DNS_USER}" zerotier
-            if [ "$(stat -c %U "${DNS_LOG_PATH}")" != "${DNS_USER}" ] ; then chown -R "${DNS_USER}":zerotier "${DNS_LOG_PATH}"/"${DNS_LOG_FILE}" ; fi
-        ;;
         logs )
-            if [ ! -d "${LOG_PATH}" ]; then
-                mkdir -p "${LOG_PATH}"
-            fi
-            if [ "$(stat -c %G "${LOG_PATH}")" != "zerotier" ] ; then chown -R zerotier:zerotier "${LOG_PATH}" ; fi
+            create_folder \
+                            "${LOG_PATH}" \
+                            zerotier:root 755
         ;;
         ui )
             :
@@ -93,66 +74,7 @@ bootstrap_filesystem() {
     esac
 }
 
-
-configure_client() {
-    if var_false "${CLIENT_ENABLE_METRICS}" ; then ln -sf /dev/null "${CLIENT_DATA_PATH}"/metrics.prom ; fi
-    cat <<EOF > "${CLIENT_DATA_PATH}"/local.conf
-  {
-    "settings": {
-        "primaryPort": ${CLIENT_LISTEN_PORT},
-        "portMappingEnabled": ${CLIENT_ENABLE_PORT_MAPPING,,},
-        "softwareUpdate": "disable",
-        "allowTcpFallbackRelay": ${CLIENT_ALLOW_TCP_FALLBACK_RELAY,,}
-    }
-  }
-EOF
-
-    transform_file_var \
-                        CLIENT_IDENTITY_PUBLIC \
-                        CLIENT_IDENTITY_PRIVATE \
-                        CLIENT_NETWORK
-
-    if [ -n "${CLIENT_IDENTITY_PUBLIC}" ] ; then
-        echo "${CLIENT_IDENTITY_PUBLIC}" > "${CLIENT_DATA_PATH}"/identity.public
-    fi
-
-    if [ -n "${CLIENT_IDENTITY_PRIVATE}" ] ; then
-        if [ -n "${CLIENT_IDENTITY_PUBLIC}" ] ; then
-            _client_identity_public=${CLIENT_IDENTITY_PUBLIC}
-        elif [ -f "${CLIENT_DATA_PATH}"/identity.public ] ; then
-            _client_identity_public=$(cat "${CLIENT_DATA_PATH}"/identity.public)
-        else
-            print_error "Need Controller Public identity environment variable or existing file"
-            exit 1
-        fi
-        echo "${_client_identity_public}:${CLIENT_IDENTITY_PRIVATE}" > "${CLIENT_DATA_PATH}"/identity.secret
-    fi
-
-    if [ -n "${CLIENT_NETWORK}" ] ; then
-        mkdir -p "${CLIENT_DATA_PATH}"/networks.d
-        _client_network_list=$(echo "${CLIENT_NETWORK}" | tr ' ' '\n')
-
-        _client_join_network() {
-            print_info "[zerotier-client] Joining $1"
-            touch "%{CLIENT_DATA_PATH}"/"$1".conf
-        }
-
-        for ztnetwork in $_client_network_list ; do
-            [[ "${ztnetwork}" =~ ^[[:space:]]*# ]] && continue
-                if [ -f ${ztnetwork} ] ; then
-                print_debug "[zerotier-client] [network] Reading networks from file"
-                while read ztline; do
-                [[ "${ztline}" =~ ^[[:space:]]*# ]] && continue
-                    _client_join_network $(echo ${ztline} | awk '{print $1}')
-                done < "$ztnetwork"
-            else
-                _client_join_network $ztnetwork
-            fi
-        done
-    fi
-}
-
-configure_controller() {
+zerotier_configure_controller() {
     if var_false "${CONTROLLER_ENABLE_METRICS}" ; then ln -sf /dev/null "${CONTROLLER_DATA_PATH}"/metrics.prom ; fi
     for management_network in ${CONTROLLER_MANAGEMENT_NETWORKS//,/$IFS}; do
         management_networks=${management_networks}"\"${management_network}\","
@@ -215,30 +137,12 @@ EOF
     fi
 }
 
-configure_dns() {
-    sanity_var ZTNET_API_TOKEN "Personal + Org API Token from ZTNET"
-    set -o posix ; set | grep -E '^(DNS_LISTEN_PORT=|LOG_PATH=|ZTNET_API_HOST=|ZTNET_AUTH_HEADER=|ZT_NETWORKS=)' > /etc/coredns/.env
-    sed -i "s|^DNS_|COREDNS_|g" /etc/coredns/.env
-    case "${DNS_OUTPUT_FORMAT,,}" in
-        both )
-                echo "${DNS_UPDATE_PERIOD} source /etc/coredns/.env ; s6-setuidgid ${DNS_USER} /usr/local/bin/ztnet-dns-companion --mode hosts --file >/dev/null 2>&1 ; s6-setuidgid ${DNS_USER} /usr/local/bin/ztnet-dns-companion --mode zones --file >/dev/null 2>&1" >> /assets/cron/crontab.txt
-            ;;
-        host* )
-                echo "${DNS_UPDATE_PERIOD} source /etc/coredns/.env ; s6-setuidgid ${DNS_USER} /usr/local/bin/ztnet-dns-companion --mode hosts --file >/dev/null 2>&1" >> /assets/cron/crontab.txt
-            ;;
-        zone* )
-                echo "${DNS_UPDATE_PERIOD} source /etc/coredns/.env ; s6-setuidgid ${DNS_USER} /usr/local/bin/ztnet-dns-companion --mode zones --file >/dev/null 2>&1" >> /assets/cron/crontab.txt
-            ;;
-    esac
-    echo "${DNS_UPDATE_PERIOD} source /etc/coredns/.env ; s6-setuidgid ${DNS_USER} /usr/local/bin/ztnet-dns-companion --file >/dev/null 2>&1" >> /assets/cron/crontab.txt
-}
-
-configure_ui() {
+zerotier_configure_ui() {
     sanity_var UI_SITE_URL "Site URL eg https://example.com"
 
     sed -i "s|{{UI_LISTEN_PORT}}|${UI_LISTEN_PORT}|g" /etc/nginx/sites.enabled/${NGINX_SITE_ENABLED}.conf
 
-    transform_file_var \
+    transform_var file \
                         DB_HOST \
                         DB_NAME \
                         DB_PASS \
@@ -287,34 +191,26 @@ EOF
     update_template /etc/nginx/sites.enabled/ztnet.conf HOSTNAME
 }
 
-setup_container_mode() {
-    if [ -f "/tmp/.container/toi_zerotier/CONTAINER_MODE" ]; then
+zerotier_setup_container_mode() {
+    if [ -f "/container/state/zerotier/mode" ]; then
         print_debug "Importing MODE environment generated variables"
-        source /tmp/.container/toi_zerotier/CONTAINER_MODE
+        source /container/state/zerotier/mode
     else
-        mkdir -p /tmp/.container/toi_zerotier/
+        mkdir -p /container/state/zerotier
         modes=$(echo "${MODE}" | tr "," "\n")
         for mode in $modes ; do
             case "${mode,,}" in
-                "client" )
-                    print_debug "Enabling Container Mode for: CLIENT"
-                    echo "ENABLE_CLIENT=TRUE" >> /tmp/.container/toi_zerotier/CONTAINER_MODE
-                ;;
                 "controller" )
                     print_debug "Enabling Container Mode for: CONTROLLER"
-                    echo "ENABLE_CONTROLLER=TRUE" >> /tmp/.container/toi_zerotier/CONTAINER_MODE
-                ;;
-                "dns" )
-                    print_debug "Enabling Container Mode for: DNS"
-                    echo "ENABLE_DNS=TRUE" >> /tmp/.container/toi_zerotier/CONTAINER_MODE
+                    echo "ENABLE_CONTROLLER=TRUE" >> /container/state/zerotier/mode
                 ;;
                 "ui" )
                     print_debug "Enabling Container Mode for: UI"
-                    echo "ENABLE_UI=TRUE" >> /tmp/.container/toi_zerotier/CONTAINER_MODE
+                    echo "ENABLE_UI=TRUE" >> /container/state/zerotier/mode
                 ;;
                 "standalone" | "manual" )
                     print_debug "Enabling Container Mode for: STANDALONE"
-                    echo "ENABLE_STANDALONE=TRUE" >> /tmp/.container/toi_zerotier/CONTAINER_MODE
+                    echo "ENABLE_STANDALONE=TRUE" >> /container/state/zerotier/mode
                 ;;
                 *)
                     print_error "Unknown 'MODE' environment variable - exitting.."
@@ -322,6 +218,7 @@ setup_container_mode() {
                 ;;
             esac
         done
-        source /tmp/.container/toi_zerotier/CONTAINER_MODE
+        source /container/state/zerotier/mode
     fi
 }
+

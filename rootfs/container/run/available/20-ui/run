@@ -1,14 +1,15 @@
 #!/command/with-contenv bash
+# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
 
-source /assets/functions/00-container
-PROCESS_NAME="zt-net"
-source /assets/defaults/20-zerotier
-source /assets/functions/20-zerotier
+source /container/base/functions/container/init
+SERVICE_NAME="zt-net"
+prepare_service 20-zerotier
 check_container_initialized
 
 export NEXT_TELEMETRY_DISABLED=1
 export NODE_ENV=production
-export NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-"$(grep ^NEXTAUTH_SECRET= /app/.env | cut -d = -f2)"}
 
 if [ -z "${UI_CONTROLLER_URL}" ] ; then
     export ZT_ADDR=http://localhost:${CONTROLLER_LISTEN_PORT}

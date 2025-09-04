@@ -1,6 +1,6 @@
 services:
   zerotier-app:
-    image: tiredofit/zerotier
+    image: docker.io/nfrastack/zerotier
     container_name: zerotier-app
     labels:
       - traefik.enable=true
@@ -20,11 +20,8 @@ services:
       - CONTAINER_ENABLE_MONITORING=FALSE
 
       - MODE=CONTROLLER,UI
-      #- MODE=DNS
 
       - CONTROLLER_LISTEN_PORT=9993
-
-      - UI_SECRET=tireodfit
 
       - UI_DB_HOST=zerotier-db
       - UI_DB_PORT=5432
@@ -33,25 +30,19 @@ services:
       - UI_DB_PASS=zerotier
 
       - UI_SITE_URL=https://zerotier.example.com
-
-      #- ZTNET_API_TOKEN=organdpersonalapikeygeneratedfromthewebui
-      #- ZTNET_API_HOST=https://z.example.com
-      #- ZT_NETWORKS=abc123:example.local:net123
-
     networks:
       - proxy
       - services
     restart: always
 
   zerotier-db:
-    image: tiredofit/postgres:17
+    image: docker.io/nfrastack/postgres:16
     container_name: zerotier-db
     volumes:
       - ./db:/var/lib/postgresql/data
     environment:
       - TIMEZONE=America/Vancouver
       - CONTAINER_NAME=zerotier-db
-      - CONTAINER_ENABLE_MONITORING=FALSE
 
       - SUPERUSER_PASS=password
       - DB_NAME=zerotier
@@ -62,14 +53,13 @@ services:
     restart: always
 
   zerotier-db-backup:
-    image: tiredofit/db-backup:latest
+    image: docker.io/nfrastack/db-backup:latest
     container_name: zerotier-db-backup
     volumes:
       - ./dbbackup:/backup
     environment:
       - TIMEZONE=America/Vancouver
       - CONTAINER_NAME=zerotier-db-backup
-      - CONTAINER_ENABLE_MONITORING=FALSE
 
       - DB01_HOST=zerotier-db
       - DB01_TYPE=postgres

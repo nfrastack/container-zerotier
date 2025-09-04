@@ -95,17 +95,23 @@ RUN echo "" && \
     go mod tidy && \
     go build -ldflags='-s -w' -trimpath -o /usr/bin/ztmkworld cmd/mkworld/main.go && \
     cd /usr/src/ztnet && \
-    mkdir -p /app && \
-    cp -R next.config.mjs /app/next.config.mjs && \
-    cp -R public /app/public && \
-    cp -R package.json /app/package.json && \
-    mkdir -p /app/.next && \
-    cp -R .next/server /app/.next/server && \
-    cp -R .next/standalone/. /app/ && \
-    cp -R .next/static /app/.next/static && \
-    cp -R prisma /app/prisma && \
-    cp -R .next/BUILD* /app/.next/ && \
-    cp -R .next/*.json /app/.next && \
+    mkdir -p /app /app/.next && \
+    cp next.config.mjs package.json /app/ && \
+    cp -R \
+            public \
+            prisma \
+        /app/ && \
+    cp -R \
+            .next/server \
+            .next/static \
+        /app/.next/ && \
+    cp -R \
+            .next/standalone/. \
+        /app/ && \
+    cp -R \
+            .next/BUILD* \
+            .next/*.json \
+        /app/.next/ && \
     cd /app && \
     npm install \
             @prisma/client \

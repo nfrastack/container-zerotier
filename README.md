@@ -141,13 +141,13 @@ Below is the complete list of available options that can be used to customize yo
 | `ENABLE_NGINX`      | If wanting to use Nginx as proxy to UI_LISTEN_PORT | `TRUE`                                       |         |
 | `NGINX_LISTEN_PORT` | Nginx Listening Port                               | `80`                                         |         |
 | `UI_CONTROLLER_URL` | How can the UI access the controller               | `http://localhost:${CONTROLLER_LISTEN_PORT}` |         |
-| `UI_DB_HOST`        | DB Host for Postgresql                             |                                              |         |
-| `UI_DB_NAME`        | DB Name for UI                                     |                                              |         |
-| `UI_DB_PASS`        | Password for UI_DB_USER                            |                                              |         |
-| `UI_DB_PORT`        | DB Port for Postgresql                             | `5432`                                       |         |
-| `UI_DB_USER`        | DB User for UI_DB_NAME                             |                                              |         |
+| `UI_DB_HOST`        | DB Host for Postgresql                             |                                              | x       |
+| `UI_DB_NAME`        | DB Name for UI                                     |                                              | x       |
+| `UI_DB_PASS`        | Password for UI_DB_USER                            |                                              | x       |
+| `UI_DB_PORT`        | DB Port for Postgresql                             | `5432`                                       | x       |
+| `UI_DB_USER`        | DB User for UI_DB_NAME                             |                                              | x       |
 | `UI_LISTEN_PORT`    | What port for the UI to listen on                  | `3000`                                       |         |
-| `UI_SECRET`         | Random secret for session and cookie storage       | `random`                                     |         |
+| `UI_SECRET`         | Random secret for session and cookie storage       | `random`                                     | x       |
 | `UI_SITE_NAME`      | Site name to display on UI                         | `ZTNET`                                      |         |
 
 #### DNS Options

@@ -147,7 +147,13 @@ zerotier_configure_ui() {
                         DB_NAME \
                         DB_PASS \
                         DB_PORT \
-                        DB_USER
+                        DB_USER \
+                        UI_SECRET \
+                        UI_DB_HOST \
+                        UI_DB_NAME \
+                        UI_DB_PASS \
+                        UI_DB_PORT \
+                        UI_DB_USER
 
     if [ -n "${UI_DB_HOST}" ]; then DB_HOST=${DB_HOST:-${UI_DB_HOST}}; fi
     if [ -n "${UI_DB_NAME}" ]; then DB_NAME=${DB_NAME:-${UI_DB_NAME}}; fi

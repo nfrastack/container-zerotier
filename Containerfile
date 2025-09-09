@@ -66,7 +66,7 @@ RUN echo "" && \
                             " \
                         && \
     source /container/base/functions/container/build && \
-    container_build_log && \
+    container_build_log image && \
     create_user zerotier 9376 zerotier 9376 /dev/null && \
     package update && \
     package upgrade && \
@@ -83,6 +83,7 @@ RUN echo "" && \
     sed -i "s|ZT_SSO_SUPPORTED=1|ZTG_SSO_SUPPORTED=0|g" make-linux.mk && \
     make -j $(nproc) -f make-linux.mk && \
     make -j $(nproc) -f make-linux.mk install && \
+    container_build_log add "Zerotier" "${ZEROTIER_VERSION}" "${ZEROTIER_REPO_URL}" && \
     \
     clone_git_repo "${ZT_NET_REPO_URL}" "${ZT_NET_VERSION}" && \
     if [ -d "/build-assets/zt-net/src" ] ; then cp -Rp /build-assets/zt-net/src/* /usr/src/ztnet ; fi; \
@@ -123,6 +124,7 @@ RUN echo "" && \
                 ts-node \
                 && \
     \
+    container_build_log add "ZT Net" "${ZT_NET_VERSION}" "${ZT_NET_REPO_URL}" && \
     chown -R zerotier:zerotier /app && \
     \
     package remove \

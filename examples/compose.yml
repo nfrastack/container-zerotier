@@ -36,7 +36,7 @@ services:
     restart: always
 
   zerotier-db:
-    image: docker.io/nfrastack/postgres:16
+    image: docker.io/tiredofit/postgres:17
     container_name: zerotier-db
     volumes:
       - ./db:/var/lib/postgresql/data
@@ -53,7 +53,7 @@ services:
     restart: always
 
   zerotier-db-backup:
-    image: docker.io/nfrastack/db-backup:latest
+    image: docker.io/tiredofit/db-backup:latest
     container_name: zerotier-db-backup
     volumes:
       - ./dbbackup:/backup

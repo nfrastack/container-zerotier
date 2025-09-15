@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 zerotier_add_bash_completion() {
-    cat <<EOF >> /root/.bashrc
+    cat <<EOF | silent tee -a /root/.bashrc
 
 ## Zerotier Bash Completions
 _zerotier_get_network_ids () {
@@ -79,8 +79,8 @@ zerotier_configure_controller() {
     for management_network in ${CONTROLLER_MANAGEMENT_NETWORKS//,/$IFS}; do
         management_networks=${management_networks}"\"${management_network}\","
     done
-    management_networks=$(echo ${management_networks} | sed "s|,$||g")
-    cat <<EOF > "${CONTROLLER_DATA_PATH}"/local.conf
+    management_networks="$(echo "${management_networks}" | sed "s|,$||g")"
+    cat <<EOF | silent tee "${CONTROLLER_DATA_PATH}"/local.conf
   {
     "settings": {
         "primaryPort": ${CONTROLLER_LISTEN_PORT},
@@ -92,25 +92,25 @@ zerotier_configure_controller() {
   }
 EOF
 
-    transform_file_var \
+    transform_var file \
                         CONTROLLER_IDENTITY_PUBLIC \
                         CONTROLLER_IDENTITY_PRIVATE \
                         CONTROLLER_NETWORK
 
     if [ -n "${CONTROLLER_IDENTITY_PUBLIC}" ] ; then
-        echo "${CONTROLLER_IDENTITY_PUBLIC}" > "${CONTROLLER_DATA_PATH}"/identity.public
+        echo "${CONTROLLER_IDENTITY_PUBLIC}" | silent tee "${CONTROLLER_DATA_PATH}"/identity.public
     fi
 
     if [ -n "${CONTROLLER_IDENTITY_PRIVATE}" ] ; then
         if [ -n "${CONTROLLER_IDENTITY_PUBLIC}" ] ; then
             _controller_identity_public=${CONTROLLER_IDENTITY_PUBLIC}
         elif [ -f "${CONTROLLER_DATA_PATH}"/identity.public ] ; then
-            _controller_identity_public=$(cat "${CONTROLLER_DATA_PATH}"/identity.public})
+            _controller_identity_public=$(cat "${CONTROLLER_DATA_PATH}"/identity.public)
         else
             print_error "Need Controller Public identity environment variable or existing file"
             exit 1
         fi
-        echo "${_controller_identity_public}:${CONTROLLER_IDENTITY_PRIVATE}" > "${CONTROLLER_DATA_PATH}"/identity.secret
+        echo "${_controller_identity_public}:${CONTROLLER_IDENTITY_PRIVATE}" | sudo tee "${CONTROLLER_DATA_PATH}"/identity.secret
     fi
 
     if [ -n "${CONTROLLER_NETWORK}" ] ; then
@@ -118,18 +118,18 @@ EOF
         _controller_network_list=$(echo "${CONTROLLER_NETWORK}" | tr ' ' '\n')
 
         _controller_join_network() {
-            print_info "[zerotier-controller] Joining $1"
-            touch "%{CONTROLLER_DATA_PATH}"/"$1".conf
+            print_info "[zerotier-controller] Joining ${1}"
+            touch "%{CONTROLLER_DATA_PATH}"/"${1}".conf
         }
 
         for ztnetwork in $_controller_network_list ; do
             [[ "${ztnetwork}" =~ ^[[:space:]]*# ]] && continue
-                if [ -f ${ztnetwork} ] ; then
+                if [ -f "${ztnetwork}" ] ; then
                 print_debug "[zerotier-controller] [network] Reading networks from file"
                 while read ztline; do
                 [[ "${ztline}" =~ ^[[:space:]]*# ]] && continue
                     _controller_join_network $(echo ${ztline} | awk '{print $1}')
-                done < "$ztnetwork"
+                done < "${ztnetwork}"
             else
                 _controller_join_network $ztnetwork
             fi
@@ -140,7 +140,9 @@ EOF
 zerotier_configure_ui() {
     sanity_var UI_SITE_URL "Site URL eg https://example.com"
 
-    sed -i "s|{{UI_LISTEN_PORT}}|${UI_LISTEN_PORT}|g" /etc/nginx/sites.enabled/${NGINX_SITE_ENABLED}.conf
+    sed -i \
+                -e "s|{{UI_LISTEN_PORT}}|${UI_LISTEN_PORT}|g" \
+            /etc/nginx/sites.enabled/${NGINX_SITE_ENABLED}.conf
 
     transform_var file \
                         DB_HOST \
@@ -163,7 +165,7 @@ zerotier_configure_ui() {
 
     db_ready pgsql
 
-    cat << EOF >> /app/.env
+    cat << EOF | silent tee -a /app/.env
 DATABASE_URL=postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public
 ZT_ADDR=${ZT_ADDR}
 NEXT_PUBLIC_APP_VERSION=${ZT_NET_VERSION}
@@ -187,12 +189,12 @@ EOF
         print_warn "You should set a UI_SECRET environment variable to a secure value"
     fi
 
-    echo "NEXTAUTH_URL=\"${UI_SITE_URL}\"" >> /app/.env
-    echo "NEXT_PUBLIC_APP_VERSION=${ZTNET_VERSION}" >> /app/.env
-    echo "PORT=${UI_LISTEN_PORT}" >> /app/.env
-    echo "NEXTAUTH_SECRET=${UI_SECRET}" >> /app/.env
-    echo "AUTH_SECRET=${UI_SECRET}" >> /app/.env
-    echo "NEXT_PUBLIC_SITE_NAME=${UI_SITE_NAME}" >> /app/.env
+    echo "NEXTAUTH_URL=\"${UI_SITE_URL}\"" | silent tee -a /app/.env
+    echo "NEXT_PUBLIC_APP_VERSION=${ZTNET_VERSION}" | silent tee -a /app/.env
+    echo "PORT=${UI_LISTEN_PORT}" | silent tee -a /app/.env
+    echo "NEXTAUTH_SECRET=${UI_SECRET}" | silent tee -a /app/.env
+    echo "AUTH_SECRET=${UI_SECRET}" | silent tee -a /app/.env
+    echo "NEXT_PUBLIC_SITE_NAME=${UI_SITE_NAME}" | silent tee -a /app/.env
 
     update_template /etc/nginx/sites.enabled/ztnet.conf HOSTNAME
 }

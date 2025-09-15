@@ -19,7 +19,7 @@ LABEL \
         org.opencontainers.image.licenses="MIT"
 
 ARG \
-    ZEROTIER_VERSION="1.14.2" \
+    ZEROTIER_VERSION="1.16.0" \
     ZT_NET_VERSION="v0.7.7" \
     ZEROTIER_REPO_URL=https://github.com/zerotier/ZeroTierOne \
     ZT_NET_REPO_URL=https://github.com/sinamics/ztnet
@@ -42,7 +42,6 @@ RUN echo "" && \
     ZEROTIER_BUILD_DEPS_ALPINE=" \
                                 binutils \
                                 build-base \
-                                clang20 \
                                 git \
                                 linux-headers \
                             " \

@@ -124,7 +124,7 @@ RUN echo "" && \
                 && \
     \
     container_build_log add "ZT Net" "${ZT_NET_VERSION}" "${ZT_NET_REPO_URL}" && \
-    echo "${ZT_NET_VERSION}" > /app/.ztnet_version && \
+    echo "${ZT_NET_VERSION}" > /app/.ztnet-version && \
     chown -R zerotier:zerotier /app && \
     \
     package remove \

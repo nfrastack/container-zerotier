@@ -19,10 +19,8 @@ fi
 
 liftoff
 
-print_start "Starting Zerotier UI ZT-Net ${ZTNET_VERSION}"
+print_start "Starting Zerotier UI ZT-Net $(cat /app/.ztnet-version)"
 cd /app
 
 silent exec s6-setuidgid "${ZEROTIER_USER}" \
                                 node server.js
-
-

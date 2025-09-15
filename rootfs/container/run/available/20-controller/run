@@ -10,6 +10,6 @@ check_container_initialized
 
 liftoff
 
-print_start "Starting Zerotier One ${ZEROTIER_VERSION}"
+print_start "Starting Zerotier One $(zerotier-cli -v) in Controller Mode"
 silent exec s6-setuidgid "${ZEROTIER_USER}" \
                                             zerotier-one ${ZEROTIER_ARGS}

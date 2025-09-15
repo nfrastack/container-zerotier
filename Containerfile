@@ -18,18 +18,17 @@ LABEL \
         org.opencontainers.image.vendor="Nfrastack <https://www.nfrastack.com>" \
         org.opencontainers.image.licenses="MIT"
 
-ARG ZEROTIER_VERSION
-ARG ZT_NET_VERSION
+ARG \
+    ZEROTIER_VERSION="1.16.0" \
+    ZT_NET_VERSION="v0.7.7" \
+    ZEROTIER_REPO_URL=https://github.com/zerotier/ZeroTierOne \
+    ZT_NET_REPO_URL=https://github.com/sinamics/ztnet
 
 COPY CHANGELOG.md /usr/src/container/CHANGELOG.md
 COPY LICENSE /usr/src/container/LICENSE
 COPY README.md /usr/src/container/README.md
 
 ENV \
-    ZEROTIER_VERSION=${ZEROTIER_VERSION:-"1.14.2"} \
-    ZT_NET_VERSION=${ZT_NET_VERSION:-"v0.7.7"} \
-    ZEROTIER_REPO_URL=https://github.com/zerotier/ZeroTierOne \
-    ZT_NET_REPO_URL=https://github.com/sinamics/ztnet \
     NGINX_ENABLE_CREATE_SAMPLE_HTML=FALSE \
     NGINX_SITE_ENABLED=ztnet \
     CONTAINER_ENABLE_SCHEDULING=TRUE \
@@ -43,6 +42,7 @@ RUN echo "" && \
     ZEROTIER_BUILD_DEPS_ALPINE=" \
                                 binutils \
                                 build-base \
+                                clang20 \
                                 git \
                                 linux-headers \
                             " \
@@ -80,8 +80,8 @@ RUN echo "" && \
     clone_git_repo "${ZEROTIER_REPO_URL}" "${ZEROTIER_VERSION}" && \
     if [ -d "/build-assets/zerotier/src" ] ; then cp -Rp /build-assets/zerotier/src/* /usr/src/ztnet ; fi; \
     if [ -d "/build-assets/zerotier/scripts" ] ; then for script in /build-assets/zerotier/scripts/*.sh; do echo "** Applying $script"; bash $script; done && \ ; fi ; \
-    sed -i "s|ZT_SSO_SUPPORTED=1|ZTG_SSO_SUPPORTED=0|g" make-linux.mk && \
-    make -j $(nproc) -f make-linux.mk && \
+    sed -i "s|ZT_SSO_SUPPORTED=1|ZT_SSO_SUPPORTED=0|g" make-linux.mk && \
+    make -j $(nproc) -f make-linux.mk ZT_NONFREE=1 && \
     make -j $(nproc) -f make-linux.mk install && \
     container_build_log add "Zerotier" "${ZEROTIER_VERSION}" "${ZEROTIER_REPO_URL}" && \
     \

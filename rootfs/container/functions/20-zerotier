@@ -55,23 +55,13 @@ EOF
 }
 
 zerotier_bootstrap_filesystem() {
-    case "${1}" in
-        controller )
-            create_folder \
+        create_folder \
                             "${CONTROLLER_DATA_PATH}" \
                             zerotier:root 750
-
-            ln -sf "${CONTROLLER_DATA_PATH}" /var/lib/zerotier-one
-        ;;
-        logs )
-            create_folder \
+        ln -sf "${CONTROLLER_DATA_PATH}" /var/lib/zerotier-one
+        create_folder \
                             "${LOG_PATH}" \
                             zerotier:root 755
-        ;;
-        ui )
-            :
-        ;;
-    esac
 }
 
 zerotier_configure_controller() {

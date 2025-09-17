@@ -19,7 +19,7 @@ LABEL \
         org.opencontainers.image.licenses="MIT"
 
 ARG \
-    ZEROTIER_VERSION="1.14.2" \
+    ZEROTIER_VERSION="1.16.0" \
     ZT_NET_VERSION="v0.7.7" \
     ZEROTIER_REPO_URL=https://github.com/zerotier/ZeroTierOne \
     ZT_NET_REPO_URL=https://github.com/sinamics/ztnet
@@ -44,6 +44,7 @@ RUN echo "" && \
                                 build-base \
                                 git \
                                 linux-headers \
+rust cargo \
                             " \
                         && \
     ZEROTIER_RUN_DEPS_ALPINE=" \
@@ -80,8 +81,9 @@ RUN echo "" && \
     if [ -d "/build-assets/zerotier/src" ] ; then cp -Rp /build-assets/zerotier/src/* /usr/src/ztnet ; fi; \
     if [ -d "/build-assets/zerotier/scripts" ] ; then for script in /build-assets/zerotier/scripts/*.sh; do echo "** Applying $script"; bash $script; done && \ ; fi ; \
     sed -i "s|ZT_SSO_SUPPORTED=1|ZT_SSO_SUPPORTED=0|g" make-linux.mk && \
-    make -j $(nproc) -f make-linux.mk ZT_NONFREE=1 && \
-    make -j $(nproc) -f make-linux.mk install && \
+    make -j $(nproc) -f make-linux.mk ZT_NONFREE=1 ZT_CONTROLLER=0 && \
+    make install && \
+    rm -rf /var/lib/zerotier-one && \
     container_build_log add "Zerotier" "${ZEROTIER_VERSION}" "${ZEROTIER_REPO_URL}" && \
     \
     clone_git_repo "${ZT_NET_REPO_URL}" "${ZT_NET_VERSION}" && \

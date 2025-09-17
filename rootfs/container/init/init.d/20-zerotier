@@ -8,7 +8,9 @@ prepare_service 20-zerotier
 SERVICE_NAME="zerotier"
 
 zerotier_setup_container_mode
+set -x
 zerotier_bootstrap_filesystem
+set +x
 zerotier_add_bash_completion
 
 if [ ! -f "/container/state/restart" ] ; then

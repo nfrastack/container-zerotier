@@ -56,8 +56,10 @@ EOF
 
 zerotier_bootstrap_filesystem() {
         create_folder \
+        create_folder \
                             "${CONTROLLER_DATA_PATH}" \
                             zerotier:root 750
+
         ln -sf "${CONTROLLER_DATA_PATH}" /var/lib/zerotier-one
         create_folder \
                             "${LOG_PATH}" \
@@ -104,7 +106,9 @@ EOF
     fi
 
     if [ -n "${CONTROLLER_NETWORK}" ] ; then
-        mkdir -p "${CONTROLLER_DATA_PATH}"/networks.d
+        create_folder \
+                            "${CONTROLLER_DATA_PATH}"/networks.d \
+                            zerotier:root 750
         _controller_network_list=$(echo "${CONTROLLER_NETWORK}" | tr ' ' '\n')
 
         _controller_join_network() {
@@ -159,11 +163,10 @@ zerotier_configure_ui() {
 DATABASE_URL=postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public
 ZT_ADDR=${ZT_ADDR}
 NEXT_PUBLIC_APP_VERSION=${ZT_NET_VERSION}
-
 EOF
 
-    envFilename='.env.production'
-    nextFolder='/app/.next/'
+    #envFilename='.env.production'
+    #nextFolder='/app/.next/'
 
     cd /app
     print_info "[ui] Applying migrations to the database"
@@ -179,12 +182,14 @@ EOF
         print_warn "You should set a UI_SECRET environment variable to a secure value"
     fi
 
-    echo "NEXTAUTH_URL=\"${UI_SITE_URL}\"" | silent tee -a /app/.env
-    echo "NEXT_PUBLIC_APP_VERSION=${ZTNET_VERSION}" | silent tee -a /app/.env
-    echo "PORT=${UI_LISTEN_PORT}" | silent tee -a /app/.env
-    echo "NEXTAUTH_SECRET=${UI_SECRET}" | silent tee -a /app/.env
-    echo "AUTH_SECRET=${UI_SECRET}" | silent tee -a /app/.env
-    echo "NEXT_PUBLIC_SITE_NAME=${UI_SITE_NAME}" | silent tee -a /app/.env
+    cat <<EOF | silent tee -a /app/.env
+NEXTAUTH_URL=\"${UI_SITE_URL}\"
+NEXT_PUBLIC_APP_VERSION=${ZTNET_VERSION}
+PORT=${UI_LISTEN_PORT}
+NEXTAUTH_SECRET=${UI_SECRET}
+AUTH_SECRET=${UI_SECRET}
+NEXT_PUBLIC_SITE_NAME=${UI_SITE_NAME}
+EOF
 
     update_template /etc/nginx/sites.enabled/ztnet.conf HOSTNAME
 }
@@ -200,15 +205,15 @@ zerotier_setup_container_mode() {
             case "${mode,,}" in
                 "controller" )
                     print_debug "Enabling Container Mode for: CONTROLLER"
-                    echo "ENABLE_CONTROLLER=TRUE" >> /container/state/zerotier/mode
+                    echo "ENABLE_CONTROLLER=TRUE" | silent tee -a /container/state/zerotier/mode
                 ;;
                 "ui" )
                     print_debug "Enabling Container Mode for: UI"
-                    echo "ENABLE_UI=TRUE" >> /container/state/zerotier/mode
+                    echo "ENABLE_UI=TRUE" | silent tee -a /container/state/zerotier/mode
                 ;;
                 "standalone" | "manual" )
                     print_debug "Enabling Container Mode for: STANDALONE"
-                    echo "ENABLE_STANDALONE=TRUE" >> /container/state/zerotier/mode
+                    echo "ENABLE_STANDALONE=TRUE" | silent tee -a /container/state/zerotier/mode
                 ;;
                 *)
                     print_error "Unknown 'MODE' environment variable - exitting.."

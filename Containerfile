@@ -20,13 +20,8 @@ LABEL \
         org.opencontainers.image.licenses="MIT"
 
 ARG \
-<<<<<<< HEAD
-    ZEROTIER_VERSION="1.16.0" \
-    ZT_NET_VERSION="v0.7.7" \
-=======
     ZEROTIER_VERSION="1.14.2" \
     ZT_NET_VERSION="v0.7.8" \
->>>>>>> f230305 (1.2.0pre)
     ZEROTIER_REPO_URL=https://github.com/zerotier/ZeroTierOne \
     ZT_NET_REPO_URL=https://github.com/sinamics/ztnet
 

@@ -8,12 +8,6 @@ prepare_service 20-zerotier
 SERVICE_NAME="zerotier"
 
 zerotier_setup_container_mode
-<<<<<<< HEAD
-set -x
-zerotier_bootstrap_filesystem
-set +x
-=======
->>>>>>> f230305 (1.2.0pre)
 zerotier_add_bash_completion
 zerotier_bootstrap_filesystem
 

@@ -23,8 +23,6 @@ jobs:
       distro: ${{ matrix.distro }}
       distro_variant: ${{ matrix.distro_variant }}
       image_variant: ${{ matrix.image_variant || '' }}
-      include_distro_tag: false
-      include_variant_tag: false
       tag: ${{ matrix.tag || '' }}
       latest: ${{ matrix.latest }}
       distro_latest: ${{ matrix.distro_latest }}

@@ -73,18 +73,32 @@ RUN echo "" && \
                         ZTNET_RUN_DEPS \
                         && \
     \
-    clone_git_repo "${ZEROTIER_REPO_URL}" "${ZEROTIER_VERSION}" && \
-    if [ -d "/build-assets/zerotier/src" ] ; then cp -Rp /build-assets/zerotier/src/* /usr/src/ztnet ; fi; \
-    if [ -d "/build-assets/zerotier/scripts" ] ; then for script in /build-assets/zerotier/scripts/*.sh; do echo "** Applying $script"; bash $script; done && \ ; fi ; \
+    clone_git_repo "${ZEROTIER_REPO_URL}" "${ZEROTIER_VERSION}" /usr/src/zerotier && \
+    #build_assets src /build-assets/zerotier/src /usr/src/zerotier && \
+    #build_assets scripts /build-assets/zerotier/scripts && \
+    \
+    #if [ -d "/build-assets/zerotier/src" ] ; then cp -Rp /build-assets/zerotier/src/* /usr/src/ztnet ; fi; \
+    #if [ -d "/build-assets/zerotier/scripts" ] ; then for script in /build-assets/zerotier/scripts/*.sh; do echo "** Applying $script"; bash $script; done && \ ; fi ; \
     sed -i "s|ZT_SSO_SUPPORTED=1|ZT_SSO_SUPPORTED=0|g" make-linux.mk && \
     make -j $(nproc) -f make-linux.mk ZT_NONFREE=1 && \
     make -j $(nproc) -f make-linux.mk install && \
     container_build_log add "Zerotier" "${ZEROTIER_VERSION}" "${ZEROTIER_REPO_URL}" && \
     \
-    clone_git_repo "${ZT_NET_REPO_URL}" "${ZT_NET_VERSION}" && \
-    if [ -d "/build-assets/zt-net/src" ] ; then cp -Rp /build-assets/zt-net/src/* /usr/src/ztnet ; fi; \
-    if [ -d "/build-assets/zt-net/scripts" ] ; then for script in /build-assets/zt-net/scripts/*.sh; do echo "** Applying $script"; bash $script; done && \ ; fi ; \
+    clone_git_repo "${ZT_NET_REPO_URL}" "${ZT_NET_VERSION}" /usr/src/ztnet && \
+    #build_assets src /build-assets/zt-net/src /usr/src/ztnet && \
+    #build_assets scripts /build-assets/zt-net/scripts && \
+    #if [ -d "/build-assets/zt-net/src" ] ; then cp -aRp /build-assets/zt-net/src/* /usr/src/ztnet ; fi; \
+    #if [ -d "/build-assets/zt-net/scripts" ] ; then for script in /build-assets/zt-net/scripts/*.sh; do echo "** Applying $script"; bash $script; done && \ ; fi ; \
     cd /usr/src/ztnet && \
+    npm install \
+            @prisma/client \
+            @paralleldrive/cuid2 \
+            && \
+    \
+    npm install -g \
+                prisma \
+                ts-node \
+                && \
     npx prisma generate && \
     npm ci && \
     SKIP_ENV_VALIDATION=1 npm run build && \
@@ -115,11 +129,11 @@ RUN echo "" && \
             @paralleldrive/cuid2 \
             && \
     \
-    npm install -g \
-                prisma \
-                ts-node \
-                && \
-    \
+    #npm install -g \
+    #            prisma \
+    #            ts-node \
+    #            && \
+    #\
     container_build_log add "ZT Net" "${ZT_NET_VERSION}" "${ZT_NET_REPO_URL}" && \
     echo "${ZT_NET_VERSION}" > /app/.ztnet-version && \
     chown -R zerotier:zerotier /app && \

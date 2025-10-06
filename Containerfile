@@ -2,7 +2,9 @@
 #
 # SPDX-License-Identifier: MIT
 
-ARG BASE_IMAGE
+ARG \
+    BASE_IMAGE
+
 FROM ${BASE_IMAGE}
 
 LABEL \

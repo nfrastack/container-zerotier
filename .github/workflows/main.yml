@@ -20,15 +20,13 @@ jobs:
     uses: nfrastack/gha/.github/workflows/container-build_generic.yml@main
     with:
       base_image: "ghcr.io/nfrastack/container-nginx"
+      tag: ${{ matrix.tag || '' }}
       distro: ${{ matrix.distro }}
       distro_variant: ${{ matrix.distro_variant }}
       image_variant: ${{ matrix.image_variant || '' }}
-      tag: ${{ matrix.tag || '' }}
       latest: ${{ matrix.latest }}
       distro_latest: ${{ matrix.distro_latest }}
       platforms: ${{ matrix.arch }}
-      push_dockerhub: ${{ matrix.push_dockerhub || true }}
-      push_ghcr: ${{ matrix.push_ghcr || true }}
     secrets: inherit
   cleanup:
     needs: [ build ]

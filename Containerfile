@@ -18,7 +18,7 @@ LABEL \
         org.opencontainers.image.licenses="MIT"
 
 ARG \
-    ZEROTIER_VERSION="1.14.2" \
+    ZEROTIER_VERSION="1.16.0" \
     ZT_NET_VERSION="v0.7.8" \
     ZEROTIER_REPO_URL=https://github.com/zerotier/ZeroTierOne \
     ZT_NET_REPO_URL=https://github.com/sinamics/ztnet
@@ -53,7 +53,6 @@ RUN echo "" && \
                         && \
     \
     ZTNET_BUILD_DEPS_ALPINE=" \
-                                go \
                                 zip \
                             " \
                         && \
@@ -74,6 +73,7 @@ RUN echo "" && \
                         ZTNET_BUILD_DEPS \
                         ZTNET_RUN_DEPS \
                         && \
+    package build go && \
     \
     clone_git_repo "${ZEROTIER_REPO_URL}" "${ZEROTIER_VERSION}" /usr/src/zerotier && \
     #build_assets src /build-assets/zerotier/src /usr/src/zerotier && \
@@ -131,11 +131,6 @@ RUN echo "" && \
             @paralleldrive/cuid2 \
             && \
     \
-    #npm install -g \
-    #            prisma \
-    #            ts-node \
-    #            && \
-    #\
     container_build_log add "ZT Net" "${ZT_NET_VERSION}" "${ZT_NET_REPO_URL}" && \
     echo "${ZT_NET_VERSION}" > /app/.ztnet-version && \
     chown -R zerotier:zerotier /app && \

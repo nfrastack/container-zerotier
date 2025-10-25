@@ -1,10 +1,12 @@
 ## 1.2.0pre 2025-09-04 <code at nfrastack dot com>
 
    ### Changed
-    - Switch to nfrastack/container-nginx as base image
+     - Switch to nfrastack/container-nginx as base image
+     - ZeroTier 1.16.0
+     - ZT Net 0.7.9
 
    ### Removed
-    - DNS and Client Mode
+     - DNS and Client Mode
 
 ## 1.1.99 2025-09-04 <dave at tiredofit dot ca>
 

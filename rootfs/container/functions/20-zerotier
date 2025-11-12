@@ -67,12 +67,12 @@ zerotier_bootstrap_filesystem() {
 }
 
 zerotier_configure_controller() {
-    if var_false "${CONTROLLER_ENABLE_METRICS}" ; then ln -sf /dev/null "${CONTROLLER_DATA_PATH}"/metrics.prom ; fi
+    if var_false "${CONTROLLER_ENABLE_METRICS}" ; then ln -sf /dev/null "${CONTROLLER_DATA_PATH%/}"/metrics.prom ; fi
     for management_network in ${CONTROLLER_MANAGEMENT_NETWORKS//,/$IFS}; do
         management_networks=${management_networks}"\"${management_network}\","
     done
     management_networks="$(echo "${management_networks}" | sed "s|,$||g")"
-    cat <<EOF | silent tee "${CONTROLLER_DATA_PATH}"/local.conf
+    cat <<EOF | silent tee "${CONTROLLER_DATA_PATH%/}"/local.conf
   {
     "settings": {
         "primaryPort": ${CONTROLLER_LISTEN_PORT},
@@ -90,30 +90,30 @@ EOF
                         CONTROLLER_NETWORK
 
     if [ -n "${CONTROLLER_IDENTITY_PUBLIC}" ] ; then
-        echo "${CONTROLLER_IDENTITY_PUBLIC}" | silent tee "${CONTROLLER_DATA_PATH}"/identity.public
+        echo "${CONTROLLER_IDENTITY_PUBLIC}" | silent tee "${CONTROLLER_DATA_PATH%/}"/identity.public
     fi
 
     if [ -n "${CONTROLLER_IDENTITY_PRIVATE}" ] ; then
         if [ -n "${CONTROLLER_IDENTITY_PUBLIC}" ] ; then
             _controller_identity_public=${CONTROLLER_IDENTITY_PUBLIC}
-        elif [ -f "${CONTROLLER_DATA_PATH}"/identity.public ] ; then
-            _controller_identity_public=$(cat "${CONTROLLER_DATA_PATH}"/identity.public)
+        elif [ -f "${CONTROLLER_DATA_PATH%/}"/identity.public ] ; then
+            _controller_identity_public=$(cat "${CONTROLLER_DATA_PATH%/}"/identity.public)
         else
             print_error "Need Controller Public identity environment variable or existing file"
             exit 1
         fi
-        echo "${_controller_identity_public}:${CONTROLLER_IDENTITY_PRIVATE}" | sudo tee "${CONTROLLER_DATA_PATH}"/identity.secret
+        echo "${_controller_identity_public}:${CONTROLLER_IDENTITY_PRIVATE}" | sudo tee "${CONTROLLER_DATA_PATH%/}"/identity.secret
     fi
 
     if [ -n "${CONTROLLER_NETWORK}" ] ; then
         create_folder \
-                            "${CONTROLLER_DATA_PATH}"/networks.d \
+                            "${CONTROLLER_DATA_PATH%/}"/networks.d \
                             zerotier:root 750
         _controller_network_list=$(echo "${CONTROLLER_NETWORK}" | tr ' ' '\n')
 
         _controller_join_network() {
             print_info "[zerotier-controller] Joining ${1}"
-            touch "%{CONTROLLER_DATA_PATH}"/"${1}".conf
+            touch "%{CONTROLLER_DATA_PATH%/}"/"${1}".conf
         }
 
         for ztnetwork in $_controller_network_list ; do

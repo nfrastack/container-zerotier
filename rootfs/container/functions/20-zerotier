@@ -124,7 +124,7 @@ EOF
                     _controller_join_network $(echo ${ztline} | awk '{print $1}')
                 done < "${ztnetwork}"
             else
-                _controller_join_network $ztnetwork
+                _controller_join_network ${ztnetwork}
             fi
         done
     fi
@@ -158,10 +158,10 @@ zerotier_configure_ui() {
 
     db_ready pgsql
 
-    cat << EOF | silent tee -a /app/.env
+    cat << EOF | silent tee /app/.env
 DATABASE_URL=postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public
 ZT_ADDR=${ZT_ADDR}
-NEXT_PUBLIC_APP_VERSION=${ZT_NET_VERSION}
+NEXT_PUBLIC_APP_VERSION=$(grep -o "ADD: ZT Net .* |" /container/build/${IMAGE_NAME/\//_}/build.log | awk '{print $4}')
 EOF
 
     #envFilename='.env.production'
@@ -182,8 +182,7 @@ EOF
     fi
 
     cat <<EOF | silent tee -a /app/.env
-NEXTAUTH_URL=\"${UI_SITE_URL}\"
-NEXT_PUBLIC_APP_VERSION=${ZTNET_VERSION}
+NEXTAUTH_URL="${UI_SITE_URL}"
 PORT=${UI_LISTEN_PORT}
 NEXTAUTH_SECRET=${UI_SECRET}
 AUTH_SECRET=${UI_SECRET}

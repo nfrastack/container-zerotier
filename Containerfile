@@ -52,11 +52,11 @@ RUN echo "" && \
                             " \
                         && \
     \
-    ZTNET_BUILD_DEPS_ALPINE=" \
+    ZT_NET_BUILD_DEPS_ALPINE=" \
                                 zip \
                             " \
                         && \
-    ZTNET_RUN_DEPS_ALPINE=" \
+    ZT_NET_RUN_DEPS_ALPINE=" \
                                 nodejs \
                                 npm \
                                 postgresql-client \
@@ -70,8 +70,8 @@ RUN echo "" && \
     package install \
                         ZEROTIER_BUILD_DEPS \
                         ZEROTIER_RUN_DEPS \
-                        ZTNET_BUILD_DEPS \
-                        ZTNET_RUN_DEPS \
+                        ZT_NET_BUILD_DEPS \
+                        ZT_NET_RUN_DEPS \
                         && \
     package build go && \
     \
@@ -137,7 +137,7 @@ RUN echo "" && \
     \
     package remove \
                     ZEROTIER_BUILD_DEPS \
-                    ZTNET_BUILD_DEPS \
+                    ZT_NET_BUILD_DEPS \
                     && \
     package cleanup
 

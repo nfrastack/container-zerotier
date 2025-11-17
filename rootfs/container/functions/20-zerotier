@@ -56,7 +56,6 @@ EOF
 
 zerotier_bootstrap_filesystem() {
         create_folder \
-        create_folder \
                             "${CONTROLLER_DATA_PATH}" \
                             zerotier:root 750
 

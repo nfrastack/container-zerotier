@@ -3,7 +3,7 @@
    ### Changed
      - Switch to nfrastack/container-nginx as base image
      - ZeroTier 1.16.0
-     - ZT Net 0.7.9
+     - ZT Net 0.7.12
 
    ### Removed
      - DNS and Client Mode

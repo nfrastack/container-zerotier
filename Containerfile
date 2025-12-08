@@ -19,7 +19,7 @@ LABEL \
 
 ARG \
     ZEROTIER_VERSION="1.16.0" \
-    ZT_NET_VERSION="v0.7.9" \
+    ZT_NET_VERSION="v0.7.12" \
     ZEROTIER_REPO_URL=https://github.com/zerotier/ZeroTierOne \
     ZT_NET_REPO_URL=https://github.com/sinamics/ztnet
 
@@ -94,12 +94,12 @@ RUN echo "" && \
     #if [ -d "/build-assets/zt-net/scripts" ] ; then for script in /build-assets/zt-net/scripts/*.sh; do echo "** Applying $script"; bash $script; done && \ ; fi ; \
     cd /usr/src/ztnet && \
     npm install \
-            @prisma/client \
+            @prisma/client@6.16.3 \
             @paralleldrive/cuid2 \
             && \
     \
     npm install -g \
-                prisma \
+                prisma@6.16.3 \
                 ts-node \
                 && \
     npx prisma generate && \

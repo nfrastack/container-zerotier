@@ -10,6 +10,7 @@ check_container_initialized
 
 export NEXT_TELEMETRY_DISABLED=1
 export NODE_ENV=production
+export HOSTNAME=0.0.0.0
 
 if [ "${UI_USER}" != "root" ] ; then
     sudo_prefix="sudo -Eu ${UI_USER}"

@@ -4,11 +4,39 @@
 # SPDX-License-Identifier: MIT
 
 source /container/base/functions/container/init
-SERVICE_NAME="zerotier-controller"
+SERVICE_NAME="controller"
 prepare_service 20-zerotier
 check_container_initialized
 
-liftoff
+if [ "${CONTROLLER_USER}" != "root" ] ; then
+    sudo_prefix="sudo -u ${CONTROLLER_USER}"
+fi
 
+case "${CONTROLLER_LOG_TYPE,,}" in
+    both )
+        SHOW_OUTPUT=TRUE
+        ${sudo_prefix} touch "${CONTROLLER_LOG_PATH%/}"/"${CONTROLLER_LOG_FILE}"
+    ;;
+    console )
+        SHOW_OUTPUT=TRUE
+        CONTROLLER_LOG_PATH=/dev
+        CONTROLLER_LOG_FILE=null
+
+    ;;
+    file )
+        SHOW_OUTPUT=FALSE
+        ${sudo_prefix} touch "${CONTROLLER_LOG_PATH%/}"/"${CONTROLLER_LOG_FILE}"
+        silent_arg="silent"
+    ;;
+    none )
+        SHOW_OUTPUT=FALSE
+        CONTROLLER_LOG_PATH=/dev
+        CONTROLLER_LOG_FILE=null
+        silent_arg="silent"
+    ;;
+esac
+
+liftoff
 print_start "Starting Zerotier One $(zerotier-cli -v) in Controller Mode"
-silent exec zerotier-one ${ZEROTIER_ARGS}
+exec ${sudo_prefix} \
+                    zerotier-one ${ZEROTIER_ARGS} 2>&1| ts -m '%Y-%m-%dT%H:%M.%S [controller]' | ${silent_arg} ${sudo_prefix} tee -a "${CONTROLLER_LOG_PATH%/}"/"${CONTROLLER_LOG_FILE}"

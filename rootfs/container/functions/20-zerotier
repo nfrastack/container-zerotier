@@ -54,18 +54,22 @@ complete -F _zerotier_zerotier-cli_completions zerotier-cli
 EOF
 }
 
-zerotier_bootstrap_filesystem() {
-        create_folder \
-                            "${CONTROLLER_DATA_PATH}" \
-                            zerotier:root 750
+zerotier_controller_configure() {
+    create_folder \
+                    "${CONTROLLER_DATA_PATH}" \
+                    "${CONTROLLER_USER}":root 750
 
-        ln -sf "${CONTROLLER_DATA_PATH}" /var/lib/zerotier-one
-        create_folder \
-                            "${LOG_PATH}" \
-                            zerotier:root 755
-}
+    ln -sf "${CONTROLLER_DATA_PATH}" /var/lib/zerotier-one
 
-zerotier_configure_controller() {
+    case "${CONTROLLER_LOG_TYPE,,}" in
+        "file" | "both")
+            create_folder \
+                            "${CONTROLLER_LOG_PATH}" \
+                            "${CONTROLLER_USER}":root 750
+            create_logrotate zerotier-controller "${CONTROLLER_LOG_PATH%/}/${CONTROLLER_LOG_FILE}" "${CONTROLLER_USER}" root
+        ;;
+    esac
+
     if var_false "${CONTROLLER_ENABLE_METRICS}" ; then ln -sf /dev/null "${CONTROLLER_DATA_PATH%/}"/metrics.prom ; fi
     for management_network in ${CONTROLLER_MANAGEMENT_NETWORKS//,/$IFS}; do
         management_networks=${management_networks}"\"${management_network}\","
@@ -130,12 +134,17 @@ EOF
     fi
 }
 
-zerotier_configure_ui() {
+zerotier_ui_configure() {
     sanity_var UI_SITE_URL "Site URL eg https://example.com"
 
-    sed -i \
-                -e "s|{{UI_LISTEN_PORT}}|${UI_LISTEN_PORT}|g" \
-            /etc/nginx/sites.enabled/${NGINX_SITE_ENABLED}.conf
+    case "${UI_LOG_TYPE,,}" in
+        "file" | "both" )
+            create_folder \
+                    "${UI_LOG_PATH}" \
+                        "${UI_USER}":root 750
+            create_logrotate zt-net "${UI_LOG_PATH%/}/${UI_LOG_FILE}" "${UI_USER}" root
+        ;;
+    esac
 
     transform_var file \
                         DB_HOST \
@@ -143,12 +152,22 @@ zerotier_configure_ui() {
                         DB_PASS \
                         DB_PORT \
                         DB_USER \
-                        UI_SECRET \
                         UI_DB_HOST \
                         UI_DB_NAME \
                         UI_DB_PASS \
                         UI_DB_PORT \
-                        UI_DB_USER
+                        UI_DB_USER \
+                        UI_HOSTNAME \
+                        UI_LISTEN_PORT \
+                        UI_PROTOCOL \
+                        UI_SECRET
+
+    update_template \
+                    /etc/nginx/sites.enabled/"${NGINX_SITE_ENABLED}".conf \
+                                                                        UI_HOSTNAME \
+                                                                        UI_LISTEN_PORT \
+                                                                        UI_PROTOCOL \
+                                                                        UI_SITE_URL
 
     if [ -n "${UI_DB_HOST}" ]; then DB_HOST=${DB_HOST:-${UI_DB_HOST}}; fi
     if [ -n "${UI_DB_NAME}" ]; then DB_NAME=${DB_NAME:-${UI_DB_NAME}}; fi
@@ -164,11 +183,11 @@ ZT_ADDR=${ZT_ADDR}
 NEXT_PUBLIC_APP_VERSION=$(grep -o "ADD: ZT Net .* |" /container/build/${IMAGE_NAME/\//_}/build.log | awk '{print $4}')
 EOF
 
-    #envFilename='.env.production'
-    #nextFolder='/app/.next/'
-
     cd /app
     print_info "[ui] Applying migrations to the database"
+    set -a
+    source /app/.env
+    set +a
     silent npx prisma migrate deploy
     silent print_info "[ui] Migrations applied successfully"
 
@@ -187,9 +206,8 @@ PORT=${UI_LISTEN_PORT}
 NEXTAUTH_SECRET=${UI_SECRET}
 AUTH_SECRET=${UI_SECRET}
 NEXT_PUBLIC_SITE_NAME=${UI_SITE_NAME}
+NEXTAUTH_URL_INTERNAL=http://127.0.0.1:${UI_LISTEN_PORT}
 EOF
-
-    update_template /etc/nginx/sites.enabled/ztnet.conf HOSTNAME
 }
 
 zerotier_setup_container_mode() {

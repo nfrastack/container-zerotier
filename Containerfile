@@ -57,6 +57,7 @@ RUN echo "" && \
                             " \
                         && \
     ZT_NET_RUN_DEPS_ALPINE=" \
+                                moreutils \
                                 nodejs \
                                 npm \
                                 postgresql-client \
@@ -76,11 +77,10 @@ RUN echo "" && \
     package build go && \
     \
     clone_git_repo "${ZEROTIER_REPO_URL}" "${ZEROTIER_VERSION}" /usr/src/zerotier && \
-    #build_assets src /build-assets/zerotier/src /usr/src/zerotier && \
-    #build_assets scripts /build-assets/zerotier/scripts && \
+    build_assets src /build-assets/zerotier/src "${GIT_REPO_SRC_ZEROTIER}" && \
+    build_assets scripts /build-assets/zerotier/scripts && \
     \
-    #if [ -d "/build-assets/zerotier/src" ] ; then cp -Rp /build-assets/zerotier/src/* /usr/src/ztnet ; fi; \
-    #if [ -d "/build-assets/zerotier/scripts" ] ; then for script in /build-assets/zerotier/scripts/*.sh; do echo "** Applying $script"; bash $script; done && \ ; fi ; \
+    cd "${GIT_REPO_SRC_ZEROTIER}" && \
     sed -i "s|ZT_SSO_SUPPORTED=1|ZT_SSO_SUPPORTED=0|g" make-linux.mk && \
     make -j $(nproc) -f make-linux.mk ZT_NONFREE=1 ZT_CONTROLLER=0 && \
     make install && \
@@ -88,10 +88,11 @@ RUN echo "" && \
     container_build_log add "Zerotier" "${ZEROTIER_VERSION}" "${ZEROTIER_REPO_URL}" && \
     \
     clone_git_repo "${ZT_NET_REPO_URL}" "${ZT_NET_VERSION}" /usr/src/ztnet && \
-    #build_assets src /build-assets/zt-net/src /usr/src/ztnet && \
-    #build_assets scripts /build-assets/zt-net/scripts && \
-    #if [ -d "/build-assets/zt-net/src" ] ; then cp -aRp /build-assets/zt-net/src/* /usr/src/ztnet ; fi; \
-    #if [ -d "/build-assets/zt-net/scripts" ] ; then for script in /build-assets/zt-net/scripts/*.sh; do echo "** Applying $script"; bash $script; done && \ ; fi ; \
+    build_assets src /build-assets/zt-net/src /usr/src/ztnet && \
+    build_assets scripts /build-assets/zt-net/scripts && \
+    cd /usr/src/ztnet/ztnodeid && \
+    go mod tidy && \
+    go build -ldflags='-s -w' -trimpath -o /usr/local/bin/ztmkworld cmd/mkworld/main.go && \
     cd /usr/src/ztnet && \
     npm install \
             @prisma/client@6.16.3 \
@@ -104,12 +105,8 @@ RUN echo "" && \
                 && \
     npx prisma generate && \
     npm ci && \
-    SKIP_ENV_VALIDATION=1 npm run build && \
-    cd /usr/src/ztnet/ztnodeid && \
-    go mod tidy && \
-    go build -ldflags='-s -w' -trimpath -o /usr/bin/ztmkworld cmd/mkworld/main.go && \
-    cd /usr/src/ztnet && \
-    mkdir -p /app /app/.next && \
+    SKIP_ENV_VALIDATION=1 npm run build:webpack && \
+    mkdir -p /app/.next && \
     cp next.config.mjs package.json /app/ && \
     cp -R \
             public \
@@ -128,9 +125,9 @@ RUN echo "" && \
         /app/.next/ && \
     cd /app && \
     npm install \
-            @prisma/client \
-            @paralleldrive/cuid2 \
-            && \
+                @prisma/client@6.16.3 \
+                @paralleldrive/cuid2 \
+                && \
     \
     container_build_log add "ZT Net" "${ZT_NET_VERSION}" "${ZT_NET_REPO_URL}" && \
     echo "${ZT_NET_VERSION}" > /app/.ztnet-version && \

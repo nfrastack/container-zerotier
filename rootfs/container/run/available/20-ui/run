@@ -4,23 +4,54 @@
 # SPDX-License-Identifier: MIT
 
 source /container/base/functions/container/init
-SERVICE_NAME="zt-net"
+SERVICE_NAME="ui"
 prepare_service 20-zerotier
 check_container_initialized
 
 export NEXT_TELEMETRY_DISABLED=1
 export NODE_ENV=production
 
+if [ "${UI_USER}" != "root" ] ; then
+    sudo_prefix="sudo -Eu ${UI_USER}"
+fi
+
 if [ -z "${UI_CONTROLLER_URL}" ] ; then
-    export ZT_ADDR=http://localhost:${CONTROLLER_LISTEN_PORT}
+    export ZT_ADDR=http://127.0.0.1:${CONTROLLER_LISTEN_PORT}
 else
     export ZT_ADDR=${UI_CONTROLLER_URL}
+fi
+
+case "${UI_LOG_TYPE,,}" in
+    both )
+        SHOW_OUTPUT=TRUE
+        ${sudo_prefix} touch "${UI_LOG_PATH%/}"/"${UI_LOG_FILE}"
+    ;;
+    console )
+        SHOW_OUTPUT=TRUE
+        UI_LOG_PATH=/dev
+        UI_LOG_FILE=null
+    ;;
+    file )
+        SHOW_OUTPUT=FALSE
+        ${sudo_prefix} touch "${UI_LOG_PATH%/}"/"${UI_LOG_FILE}"
+        silent_arg="silent"
+    ;;
+    none )
+        SHOW_OUTPUT=FALSE
+        UI_LOG_PATH=/dev
+        UI_LOG_FILE=null
+        silent_arg="silent"
+    ;;
+esac
+
+cd /app
+
+if [ -f "${CONTROLLER_DATA_PATH%/}"/authtoken.secret ] && [ -z "${ZT_SECRET}" ]; then
+    export ZT_SECRET="$(cat "${CONTROLLER_DATA_PATH%/}"/authtoken.secret)"
 fi
 
 liftoff
 
 print_start "Starting Zerotier UI ZT-Net $(cat /app/.ztnet-version)"
-cd /app
-
-silent exec s6-setuidgid "${ZEROTIER_USER}" \
-                                node server.js
+exec ${sudo_prefix} \
+                    node server.js 2>&1 | ts -m '%Y-%m-%dT%H:%M.%S [ui]' | ${silent_arg} ${sudo_prefix} tee -a "${UI_LOG_PATH%/}"/"${UI_LOG_FILE}"

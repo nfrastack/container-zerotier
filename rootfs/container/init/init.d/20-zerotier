@@ -9,21 +9,23 @@ SERVICE_NAME="zerotier"
 
 zerotier_setup_container_mode
 zerotier_add_bash_completion
-zerotier_bootstrap_filesystem
+
 
 if check_container_restarted ; then
     if var_true "${ENABLE_CONTROLLER}" ; then
         print_debug "Configuring Controller"
-        zerotier_configure_controller
+        zerotier_controller_configure
     else
         service_stop 20-controller
     fi
 
     if var_true "${ENABLE_UI}" ; then
         print_debug "Configuring UI"
-        zerotier_configure_ui
+
+        zerotier_ui_configure
     else
         service_stop 10-nginx
+        service_stop 11-nginx-config-reload
         service_stop 20-ui
     fi
 

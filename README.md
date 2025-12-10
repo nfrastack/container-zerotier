@@ -90,10 +90,10 @@ Images are built for `amd64` by default, with optional support for `arm64` and o
 
 The following directories are used for configuration and can be mapped for persistent storage.
 
-| Directory | Description                   |
-| --------- | ----------------------------- |
-| `/data/`  | ZeroTier state information    |
-| `/logs/`  | zerotier Log Output Directory |
+| Directory | Description                |
+| --------- | -------------------------- |
+| `/data/`  | ZeroTier state information |
+| `/logs/`  | Log Output Directory       |
 
 ### Environment Variables
 
@@ -128,6 +128,7 @@ Below is the complete list of available options that can be used to customize yo
 | `CONTROLLER_ENABLE_PORT_MAPPING`      | Enable Port mapping                                            | `TRUE`              |         |
 | `CONTROLLER_LISTEN_PORT`              | Zerotier Controller listen port                                | `9993`              |         |
 | `CONTROLLER_LOG_FILE`                 | Controller Log File                                            | `controller.log`    |         |
+| `CONTROLLER_LOG_PATH`                 | Where to store logs                                            | `/logs/zerotier/`   |         |
 | `CONTROLLER_MANAGEMENT_NETWORKS`      | Comma seperated value of networks allowed to manage controller | `0.0.0.0/0`         |         |
 | `CONTROLLER_USER`                     | What username to run controller as                             | `root`              |         |
 | `CONTROLLER_NETWORK`                  | (optional) Networks to join as Controller                      |                     | x       |
@@ -136,19 +137,24 @@ Below is the complete list of available options that can be used to customize yo
 
 #### UI Options
 
-| Variable            | Description                                        | Default                                      | `_FILE` |
-| ------------------- | -------------------------------------------------- | -------------------------------------------- | ------- |
-| `ENABLE_NGINX`      | If wanting to use Nginx as proxy to UI_LISTEN_PORT | `TRUE`                                       |         |
-| `NGINX_LISTEN_PORT` | Nginx Listening Port                               | `80`                                         |         |
-| `UI_CONTROLLER_URL` | How can the UI access the controller               | `http://localhost:${CONTROLLER_LISTEN_PORT}` |         |
-| `UI_DB_HOST`        | DB Host for Postgresql                             |                                              | x       |
-| `UI_DB_NAME`        | DB Name for UI                                     |                                              | x       |
-| `UI_DB_PASS`        | Password for UI_DB_USER                            |                                              | x       |
-| `UI_DB_PORT`        | DB Port for Postgresql                             | `5432`                                       | x       |
-| `UI_DB_USER`        | DB User for UI_DB_NAME                             |                                              | x       |
-| `UI_LISTEN_PORT`    | What port for the UI to listen on                  | `3000`                                       |         |
-| `UI_SECRET`         | Random secret for session and cookie storage       | `random`                                     | x       |
-| `UI_SITE_NAME`      | Site name to display on UI                         | `ZTNET`                                      |         |
+| Variable            | Description                                                    | Default                                      | `_FILE` |
+| ------------------- | -------------------------------------------------------------- | -------------------------------------------- | ------- |
+| `ENABLE_NGINX`      | If wanting to use Nginx as proxy to UI_LISTEN_PORT/UI_HOSTNAME | `TRUE`                                       |         |
+| `NGINX_LISTEN_PORT` | Nginx Listening Port                                           | `80`                                         |         |
+| `UI_CONTROLLER_URL` | How can the UI access the controller                           | `http://127.0.0.1:${CONTROLLER_LISTEN_PORT}` |         |
+| `UI_DB_HOST`        | DB Host for Postgresql                                         |                                              | x       |
+| `UI_DB_NAME`        | DB Name for UI                                                 |                                              | x       |
+| `UI_DB_PASS`        | Password for UI_DB_USER                                        |                                              | x       |
+| `UI_DB_PORT`        | DB Port for Postgresql                                         | `5432`                                       | x       |
+| `UI_DB_USER`        | DB User for UI_DB_NAME                                         |                                              | x       |
+| `UI_HOSTNAME`       | (nginx) Internal hostname to access UI for proxy purposes      | `(container_hostname)`                       | x       |
+| `UI_LISTEN_PORT`    | What port for the UI to listen on                              | `3000`                                       |         |
+| `UI_LOG_FILE`       | UI Log File                                                    | `ztnet.log`                                  |         |
+| `UI_LOG_PATH`       | Where to store logs                                            | `/logs/ui/`                                  |         |
+| `UI_PROTOCOL`       | (nginx) Protocol to use for proxy                              | `http`                                       | x       |
+| `UI_SECRET`         | Random secret for session and cookie storage                   | `random`                                     | x       |
+| `UI_SITE_NAME`      | Site name to display on UI                                     | `ZTNET`                                      |         |
+| `UI_USER`           | Run UI as this user                                            | `zerotier`                                   |         |
 
 #### DNS Options
 

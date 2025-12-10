@@ -16,8 +16,6 @@ services:
       - ./logs:/logs
     environment:
       - TIMEZONE=America/Vancouver
-      - CONTAINER_NAME=zerotier-app
-      - CONTAINER_ENABLE_MONITORING=FALSE
 
       - MODE=CONTROLLER,UI
 
@@ -36,13 +34,13 @@ services:
     restart: always
 
   zerotier-db:
-    image: docker.io/tiredofit/postgres:17
+    image: docker.io/nfrastack/postgres:18
     container_name: zerotier-db
     volumes:
-      - ./db:/var/lib/postgresql/data
+      - ./logs:/logs
+      - ./db:/data
     environment:
       - TIMEZONE=America/Vancouver
-      - CONTAINER_NAME=zerotier-db
 
       - SUPERUSER_PASS=password
       - DB_NAME=zerotier

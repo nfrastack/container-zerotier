@@ -1,4 +1,4 @@
-## 1.2.0pre 2025-09-04 <code at nfrastack dot com>
+## 1.2.0 2025-12-19 <code at nfrastack dot com>
 
    ### Changed
      - Switch to nfrastack/container-nginx as base image

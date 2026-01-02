@@ -1,3 +1,8 @@
+## 1.2.1pre 2026-01-02 <code at nfrastack dot com>
+
+   ### Changed
+     - ZeroTier 1.16.1
+
 ## 1.2.0 2025-12-19 <code at nfrastack dot com>
 
    ### Changed

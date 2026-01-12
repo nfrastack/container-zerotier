@@ -1,7 +1,9 @@
-## 1.2.1pre 2026-01-02 <code at nfrastack dot com>
+## 1.2.1 2026-01-12 <code at nfastack dot com>
 
-   ### Changed
-     - ZeroTier 1.16.1
+   ### Added
+      - ZeroTier 1.16.1
+      - ZTNet 0.7.14
+
 
 ## 1.2.0 2025-12-19 <code at nfrastack dot com>
 

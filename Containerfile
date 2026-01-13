@@ -80,7 +80,7 @@ RUN echo "" && \
     build_assets src /build-assets/zerotier/src "${GIT_REPO_SRC_ZEROTIER}" && \
     build_assets scripts /build-assets/zerotier/scripts && \
     \
-    cd "${GIT_REPO_SRC_ZEROTIER}" && \
+    cd /usr/src/zerotier && \
     sed -i "s|ZT_SSO_SUPPORTED=1|ZT_SSO_SUPPORTED=0|g" make-linux.mk && \
     make -j $(nproc) -f make-linux.mk ZT_NONFREE=1 ZT_CONTROLLER=0 && \
     make install && \

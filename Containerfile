@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+# SPDX-FileCopyrightText: © 2026 Nfrastack <code@nfrastack.com>
 #
 # SPDX-License-Identifier: MIT
 
@@ -28,9 +28,6 @@ COPY LICENSE /usr/src/container/LICENSE
 COPY README.md /usr/src/container/README.md
 
 ENV \
-    NGINX_ENABLE_CREATE_SAMPLE_HTML=FALSE \
-    NGINX_SITE_ENABLED=ztnet \
-    CONTAINER_ENABLE_SCHEDULING=TRUE \
     CONTAINER_ENABLE_MESSAGING=FALSE \
     IMAGE_NAME="nfrastack/zerotier" \
     IMAGE_REPO_URL="https://github.com/nfrastack/container-zerotier/"
@@ -38,6 +35,21 @@ ENV \
 COPY build-assets/ /build-assets
 
 RUN echo "" && \
+    BUILD_ENV=" \
+                 ENABLE_NGINX=FALSE \
+                 NGINX_SITE_ENABLED=ztnet \
+                 NGINX_SITE_ZTNET_MODE=proxy \
+                 NGINX_SITE_ZTNET_PROXY_URL=[env:UI_PROTOCOL]://[env://UI_HOSTNAME]]:[env:UI_LISTEN_PORT] \
+                 NGINX_SITE_ZTNET_HEADER_XFRAME_NAME=X-Frame-Options \
+                 NGINX_SITE_ZTNET_HEADER_XFRAME_VALUE=SAMEORIGIN \
+                 NGINX_SITE_ZTNET_HEADER_XROBOTS_NAME=X-Content-Type-Options \
+                 NGINX_SITE_ZTNET_HEADER_XROBOTS_VALUE=nosniff \
+                 NGINX_SITE_ZTNET_HEADER_XCONTENT_NAME=X-Content-Type-Options \
+                 NGINX_SITE_ZTNET_HEADER_XCONTENT_VALUE=nosniff \
+                 NGINX_SITE_ZTNET_HEADER_XSS_NAME=X-XSS-Protection \
+                 NGINX_SITE_ZTNET_HEADER_XSS_VALUE=1; mode=block \
+              " \
+              && \
     ZEROTIER_BUILD_DEPS_ALPINE=" \
                                 binutils \
                                 build-base \

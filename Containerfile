@@ -19,7 +19,7 @@ LABEL \
 
 ARG \
     ZEROTIER_VERSION="1.16.1" \
-    ZT_NET_VERSION="v0.7.14" \
+    ZT_NET_VERSION="v0.7.15" \
     ZEROTIER_REPO_URL=https://github.com/zerotier/ZeroTierOne \
     ZT_NET_REPO_URL=https://github.com/sinamics/ztnet
 
@@ -36,18 +36,18 @@ COPY build-assets/ /build-assets
 
 RUN echo "" && \
     BUILD_ENV=" \
-                 ENABLE_NGINX=FALSE \
-                 NGINX_SITE_ENABLED=ztnet \
-                 NGINX_SITE_ZTNET_MODE=proxy \
-                 NGINX_SITE_ZTNET_PROXY_URL=[env:UI_PROTOCOL]://[env://UI_HOSTNAME]]:[env:UI_LISTEN_PORT] \
-                 NGINX_SITE_ZTNET_HEADER_XFRAME_NAME=X-Frame-Options \
-                 NGINX_SITE_ZTNET_HEADER_XFRAME_VALUE=SAMEORIGIN \
-                 NGINX_SITE_ZTNET_HEADER_XROBOTS_NAME=X-Content-Type-Options \
-                 NGINX_SITE_ZTNET_HEADER_XROBOTS_VALUE=nosniff \
-                 NGINX_SITE_ZTNET_HEADER_XCONTENT_NAME=X-Content-Type-Options \
-                 NGINX_SITE_ZTNET_HEADER_XCONTENT_VALUE=nosniff \
-                 NGINX_SITE_ZTNET_HEADER_XSS_NAME=X-XSS-Protection \
-                 NGINX_SITE_ZTNET_HEADER_XSS_VALUE=1; mode=block \
+                 10-nginx/ENABLE_NGINX=FALSE \
+                 10-nginx/NGINX_SITE_ENABLED=ztnet \
+                 10-nginx/NGINX_SITE_ZTNET_MODE=proxy \
+                 10-nginx/NGINX_SITE_ZTNET_PROXY_URL=[env:UI_PROTOCOL]://[env://UI_HOSTNAME]]:[env:UI_LISTEN_PORT] \
+                 10-nginx/NGINX_SITE_ZTNET_HEADER_XFRAME_NAME=X-Frame-Options \
+                 10-nginx/NGINX_SITE_ZTNET_HEADER_XFRAME_VALUE=SAMEORIGIN \
+                 10-nginx/NGINX_SITE_ZTNET_HEADER_XROBOTS_NAME=X-Content-Type-Options \
+                 10-nginx/NGINX_SITE_ZTNET_HEADER_XROBOTS_VALUE=nosniff \
+                 10-nginx/NGINX_SITE_ZTNET_HEADER_XCONTENT_NAME=X-Content-Type-Options \
+                 10-nginx/NGINX_SITE_ZTNET_HEADER_XCONTENT_VALUE=nosniff \
+                 10-nginx/NGINX_SITE_ZTNET_HEADER_XSS_NAME=X-XSS-Protection \
+                 10-nginx/NGINX_SITE_ZTNET_HEADER_XSS_VALUE=1; mode=block \
               " \
               && \
     ZEROTIER_BUILD_DEPS_ALPINE=" \

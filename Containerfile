@@ -39,7 +39,7 @@ RUN echo "" && \
                  10-nginx/ENABLE_NGINX=FALSE \
                  10-nginx/NGINX_SITE_ENABLED=ztnet \
                  10-nginx/NGINX_SITE_ZTNET_MODE=proxy \
-                 10-nginx/NGINX_SITE_ZTNET_PROXY_URL=[env:UI_PROTOCOL]://[env://UI_HOSTNAME]]:[env:UI_LISTEN_PORT] \
+                 10-nginx/NGINX_SITE_ZTNET_PROXY_URL=[env:UI_PROTOCOL]://[env://UI_HOSTNAME]:[env:UI_LISTEN_PORT] \
                  10-nginx/NGINX_SITE_ZTNET_HEADER_XFRAME_NAME=X-Frame-Options \
                  10-nginx/NGINX_SITE_ZTNET_HEADER_XFRAME_VALUE=SAMEORIGIN \
                  10-nginx/NGINX_SITE_ZTNET_HEADER_XROBOTS_NAME=X-Content-Type-Options \

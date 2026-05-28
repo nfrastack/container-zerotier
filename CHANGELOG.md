@@ -1,3 +1,9 @@
+## 1.2.4 2026-05-28 <code at nfrastack dot com>
+
+   ### Added
+      - ZeroTier One 1.16.2
+
+
 ## 1.2.3 2026-04-05 <code at nfastack dot com>
 
    ### Added

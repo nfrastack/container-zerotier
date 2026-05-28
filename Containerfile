@@ -86,7 +86,7 @@ RUN echo "" && \
                         ZT_NET_BUILD_DEPS \
                         ZT_NET_RUN_DEPS \
                         && \
-    package build go && \
+    package build go buildtime && \
     \
     clone_git_repo "${ZEROTIER_REPO_URL}" "${ZEROTIER_VERSION}" /usr/src/zerotier && \
     build_assets src /build-assets/zerotier/src "${GIT_REPO_SRC_ZEROTIER}" && \

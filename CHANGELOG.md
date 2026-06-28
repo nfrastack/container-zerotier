@@ -1,3 +1,13 @@
+## 1.2.5 2026-06-28 <code at nfrastack dot com>
+
+   ### Added
+      - ZTNet 0.8.0
+
+   ### Changed
+      - Alpine 3.24
+      - Rewrite Heredocs with write_file
+
+
 ## 1.2.4 2026-05-28 <code at nfrastack dot com>
 
    ### Added

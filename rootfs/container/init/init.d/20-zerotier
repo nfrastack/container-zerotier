@@ -10,7 +10,6 @@ SERVICE_NAME="zerotier"
 zerotier_setup_container_mode
 zerotier_add_bash_completion
 
-
 if check_container_restarted ; then
     if var_true "${ENABLE_CONTROLLER}" ; then
         print_debug "Configuring Controller"

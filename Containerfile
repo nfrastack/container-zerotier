@@ -19,7 +19,7 @@ LABEL \
 
 ARG \
     ZEROTIER_VERSION="1.16.2" \
-    ZT_NET_VERSION="v0.8.0" \
+    ZT_NET_VERSION="v0.8.2" \
     ZEROTIER_REPO_URL=https://github.com/zerotier/ZeroTierOne \
     ZT_NET_REPO_URL=https://github.com/sinamics/ztnet
 
@@ -106,12 +106,12 @@ RUN echo "" && \
     go build -ldflags='-s -w' -trimpath -o /usr/local/bin/ztmkworld cmd/mkworld/main.go && \
     cd /usr/src/ztnet && \
     npm install \
-            @prisma/client@6.16.3 \
+            @prisma/client@6.19.3 \
             @paralleldrive/cuid2 \
             && \
-    \
+
     npm install -g \
-                prisma@6.16.3 \
+                prisma@6.19.3 \
                 ts-node \
                 && \
     npx prisma generate && \
@@ -135,11 +135,9 @@ RUN echo "" && \
             .next/*.json \
         /app/.next/ && \
     cd /app && \
-    npm install \
-                @prisma/client@6.16.3 \
-                @paralleldrive/cuid2 \
-                && \
-    \
+    rm -rf node_modules && \
+    npm install --production && \
+    npm install daisyui@^4.12.24 && \
     container_build_log add "ZT Net" "${ZT_NET_VERSION}" "${ZT_NET_REPO_URL}" && \
     echo "${ZT_NET_VERSION}" > /app/.ztnet-version && \
     chown -R zerotier:zerotier /app && \

@@ -51,13 +51,15 @@ services:
     restart: always
 
   zerotier-db-backup:
-    image: docker.io/tiredofit/db-backup:latest
+    image: docker.io/nfrastack/db-backup:latest
     container_name: zerotier-db-backup
     volumes:
       - ./dbbackup:/backup
     environment:
       - TIMEZONE=America/Vancouver
       - CONTAINER_NAME=zerotier-db-backup
+
+      - STATS_ENABLED=TRUE
 
       - DB01_HOST=zerotier-db
       - DB01_TYPE=postgres

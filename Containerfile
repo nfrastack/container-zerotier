@@ -19,7 +19,7 @@ LABEL \
 
 ARG \
     ZEROTIER_VERSION="1.16.2" \
-    ZT_NET_VERSION="v0.8.5" \
+    ZT_NET_VERSION="v0.8.6" \
     ZEROTIER_REPO_URL=https://github.com/zerotier/ZeroTierOne \
     ZT_NET_REPO_URL=https://github.com/sinamics/ztnet
 

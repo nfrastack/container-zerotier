@@ -1,3 +1,8 @@
+## 1.2.10 2026-10-26 <code at nfrastack dot com>
+
+   ### Added
+      - ZT Net 0.8.6
+
 ## 1.2.9 2026-10-04 <code at nfrastack dot com>
 
    ### Added
